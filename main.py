@@ -1,6 +1,6 @@
 import argparse
 from maze import Maze
-from game import GridDisplay
+from display import GridDisplay
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
 
     args = parser.parse_args()
 
-    maze = Maze(args.rows, args.cols).get_maze()
+    maze = Maze(args.rows, args.cols)
     grid = GridDisplay(maze)
     grid.run()
 

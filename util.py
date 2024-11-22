@@ -8,7 +8,6 @@ Date last modified: November 15th, 2024
 """
 
 
-
 class Node:
     def __init__(self, state, parent, action):
         """
@@ -21,6 +20,22 @@ class Node:
         self.state = state  # The current state as (row, col)
         self.parent = parent  # Parent node
         self.action = action  # Action taken to reach this node
+
+
+class CostNode:
+    def __init__(self, state, parent, action, cost):
+        """
+        Desc: Initializes a node for the search tree.
+        Parameters:
+            state (tuple): The current state (position) of the node.
+            parent (Node): The parent node that led to this node.
+            action (str): The action taken to reach this node from the parent.
+            cost (int): The cost required to reach this node
+        """
+        self.state = state  # The current state as (row, col)
+        self.parent = parent  # Parent node
+        self.action = action  # Action taken to reach this node
+        self.cost = cost  # Cost required to reach this node
 
 
 class StackFrontier:
@@ -90,7 +105,7 @@ class QueueFrontier(StackFrontier):
 
 
 class PriorityQueueFrontier(QueueFrontier):
-    def __init__(self, func):
+    def __init__(self, func, goal):
         """
         Desc: Initializes a priority queue frontier.
         Parameters:
@@ -98,6 +113,7 @@ class PriorityQueueFrontier(QueueFrontier):
         """
         super().__init__()  # Initialize the frontier as an empty list
         self.func = func  # Function to calculate priority
+        self.goal = goal  # Goal of the maze
 
     def add(self, node):
         """
@@ -106,4 +122,30 @@ class PriorityQueueFrontier(QueueFrontier):
             node (Node): The node to be added.
         """
         self.frontier.append(node)  # Add node to the frontier
-        self.frontier.sort(key=self.func)  # Sort the frontier based on the priority function
+        self.frontier.sort(key=lambda n: self.func(n, self.goal))  # Sort the frontier based on the priority function
+
+
+def manhattan_distance(node, goal):
+    """
+    Desc: Returns the manhattan distance from a node to goal.
+    Parameters:
+        node (Node): Node to check for distance to goal.
+        goal (tuple): State at which the goal exists
+    returns:
+    (int): Manhattan distance.
+    """
+    dist = abs(node.state[0] - goal[0]) + abs(node.state[1] - goal[1])
+    return dist
+
+
+def cumulative_cost_function(node, goal):
+    """
+    Desc: Returns the manhattan distance + the cost from start from a node to goal.
+    Parameters:
+        node (CostNode): Node to check for distance to goal.
+        goal (tuple): State at which the goal exists
+    returns:
+    (int): Manhattan distance + cost from start.
+    """
+    cost = manhattan_distance(node, goal) + node.cost
+    return cost

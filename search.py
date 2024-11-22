@@ -5,7 +5,8 @@ Date created: November 18th, 2024
 Date last modified: November 18th, 2024
 """
 
-from util import Node, StackFrontier, QueueFrontier, PriorityQueueFrontier
+from util import Node, CostNode, StackFrontier, QueueFrontier, PriorityQueueFrontier, manhattan_distance,\
+    cumulative_cost_function
 from maze import Maze
 
 
@@ -16,10 +17,42 @@ def breadth_first_search(start, maze):
         start (tuple): The starting position as (row, col).
         maze (Maze): An instance of the Maze class.
     returns:
-        (list): A list of actions leading from the start to the goal, representing the shortest path.
+        (tuple): A list of actions leading from the start to the goal, guaranteed to be the shortest path.
+                 AND. A list of all the explored states.
     """
-    # To be implemented by Abdullah Janjua
-    pass
+
+    start = Node(state=start, parent=None, action=None)
+    frontier = QueueFrontier()
+    frontier.add(start)
+
+    # Explored set
+    explored_states = set()
+    explored = list()
+
+    # Finding Solution:
+    while True:
+
+        if frontier.empty():
+            raise Exception("No solution")
+
+        node = frontier.remove()
+
+        if node.state == maze.get_goal():
+            path = []
+            while node.parent is not None:
+                path_element = tuple([node.action, node.state])
+                path.append(path_element)
+                node = node.parent
+            path.reverse()
+            return path[:-1], explored[1:]
+
+        explored_states.add(node.state)
+        explored.append(node.state)
+
+        for action, state in maze.get_next(node):
+            if not frontier.contains_state(state) and state not in explored_states:
+                child = Node(state=state, parent=node, action=action)
+                frontier.add(child)
 
 
 def depth_first_search(start, maze):
@@ -30,10 +63,41 @@ def depth_first_search(start, maze):
         start (tuple): The starting position as (row, col).
         maze (Maze): An instance of the Maze class.
     returns:
-        (list): A list of actions leading from the start to the goal (may or may not be the shortest path).
+        (tuple): A list of actions leading from the start to the goal, guaranteed to be the shortest path.
+                 AND. A list of all the explored states.
     """
-    # To be implemented by Abdullah Janjua
-    pass
+    start = Node(state=start, parent=None, action=None)
+    frontier = StackFrontier()
+    frontier.add(start)
+
+    # Explored set
+    explored_states = set()
+    explored = list()
+
+    # Finding Solution:
+    while True:
+
+        if frontier.empty():
+            raise Exception("No solution")
+
+        node = frontier.remove()
+
+        if node.state == maze.get_goal():
+            path = []
+            while node.parent is not None:
+                path_element = tuple([node.action, node.state])
+                path.append(path_element)
+                node = node.parent
+            path.reverse()
+            return path[:-1], explored[1:]
+
+        explored_states.add(node.state)
+        explored.append(node.state)
+
+        for action, state in maze.get_next(node):
+            if not frontier.contains_state(state) and state not in explored_states:
+                child = Node(state=state, parent=node, action=action)
+                frontier.add(child)
 
 
 def greedy_first_search(start, maze):
@@ -44,10 +108,40 @@ def greedy_first_search(start, maze):
         start (tuple): The starting position as (row, col).
         maze (Maze): An instance of the Maze class.
     returns:
-        (list): A list of actions leading from the start to the goal (may not be optimal).
+        (tuple): A list of actions leading from the start to the goal, guaranteed to be the shortest path.
+                 AND. A list of all the explored states.
     """
-    # To be implemented by Amna Akhtar Nawabi
-    pass
+    start = Node(state=start, parent=None, action=None)
+    goal = maze.get_goal()
+    func = manhattan_distance
+    frontier = PriorityQueueFrontier(func, goal)  # Frontier with priority queue
+    frontier.add(start)
+
+    explored_states = set()
+    explored = list()
+
+    while True:
+        if frontier.empty():
+            raise Exception("No solution")
+
+        node = frontier.remove()
+
+        if node.state == goal:
+            path = []
+            while node.parent is not None:
+                path_element = (node.action, node.state)
+                path.append(path_element)
+                node = node.parent
+            path.reverse()
+            return path[:-1], explored[1:]
+
+        explored_states.add(node.state)
+        explored.append(node.state)
+
+        for action, state in maze.get_next(node):
+            if not frontier.contains_state(state) and state not in explored_states:
+                child = Node(state=state, parent=node, action=action)
+                frontier.add(child)
 
 
 def astar_first_search(start, maze):
@@ -58,7 +152,38 @@ def astar_first_search(start, maze):
         start (tuple): The starting position as (row, col).
         maze (Maze): An instance of the Maze class.
     returns:
-        (list): A list of actions leading from the start to the goal, guaranteed to be the shortest path.
+        (tuple): A list of actions leading from the start to the goal, guaranteed to be the shortest path.
+                 AND. A list of all the explored states.
     """
-    # To be implemented by Amna Akhtar Nawabi
-    pass
+    start = CostNode(state=start, parent=None, action=None, cost=0)  # Cost is initialized to 0
+    goal = maze.get_goal()
+    func = cumulative_cost_function
+    frontier = PriorityQueueFrontier(func, goal)  # Frontier with priority queue
+    frontier.add(start)
+
+    explored_states = set()
+    explored = list()
+
+    while True:
+        if frontier.empty():
+            raise Exception("No solution")
+
+        node = frontier.remove()
+
+        if node.state == goal:
+            path = []
+            while node.parent is not None:
+                path_element = (node.action, node.state)
+                path.append(path_element)
+                node = node.parent
+            path.reverse()
+            return path[:-1], explored[1:]
+
+        explored_states.add(node.state)
+        explored.append(node.state)
+
+        for action, state in maze.get_next(node):
+            if not frontier.contains_state(state) and state not in explored_states:
+                cost = node.cost + 1  # Increment cost for each step (assuming uniform cost)
+                child = CostNode(state=state, parent=node, action=action, cost=cost)
+                frontier.add(child)

@@ -1,6 +1,7 @@
 """
 Author(s): 1. Hanzala B. Rehan
-Description: This script defines a class `Maze` which generates a random, solvable maze using Depth-First Search (DFS) algorithm.
+Description: This script defines a class `Maze` which generates a random,
+            solvable maze using Depth-First Search (DFS) algorithm.
 Date created: November 15th, 2024
 Date last modified: November 18th, 2024
 """
@@ -19,6 +20,8 @@ class Maze:
             rows (int): Number of rows in the maze.
             cols (int): Number of columns in the maze.
         """
+        self.goal = None
+        self.start = None
         self.rows = rows  # Number of rows in the maze
         self.cols = cols  # Number of columns in the maze
         self.maze = self.generate_solvable_maze()  # Generates a solvable maze upon initialization
@@ -36,6 +39,7 @@ class Maze:
         # Randomly select a starting point ('S')
         start_row, start_col = random.randint(0, self.rows - 1), random.randint(0, self.cols - 1)
         maze[start_row][start_col] = 'S'  # Set the start point on the maze
+        self.start = (start_row, start_col)
 
         # Stack to perform DFS for maze generation
         stack = [(start_row, start_col)]
@@ -130,6 +134,6 @@ class Maze:
 
             # Check if the next move is within bounds and not hitting a wall
             if 0 <= next_row < self.rows and 0 <= next_col < self.cols and self.maze[next_row][next_col] != '#':
-                next_nodes.append(((next_row, next_col), action))  # Add valid move
+                next_nodes.append((action, (next_row, next_col)))  # Add valid move
 
         return next_nodes  # Return all valid moves
